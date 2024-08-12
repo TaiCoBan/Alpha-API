@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,5 +21,14 @@ public class OrderItem {
     @Column(name = "quantity")
     private int quantity = 1;
 
-    @Column(name = "")
+    @Column(name = "price")
+    private long price = 0;
+
+    @ManyToOne
+    @JoinColumn(name = "order_order_id", nullable = false)
+    private CustomerOrder customerOrder;
+
+    @ManyToOne
+    @JoinColumn(name = "product_prod", nullable = false)
+    private Product product;
 }
