@@ -47,6 +47,8 @@ dependencies {
 	testImplementation 'ch.qos.logback:logback-classic:1.5.6'
 	// https://mvnrepository.com/artifact/org.hibernate/hibernate-validator
 	implementation 'org.hibernate:hibernate-validator:8.0.1.Final'
+	// https://mvnrepository.com/artifact/redis.clients/jedis
+	implementation 'redis.clients:jedis:5.1.4'
 
 }
 

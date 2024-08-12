@@ -31,13 +31,16 @@ public class SecurityConfig {
         httpSecurity
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(req -> req
-                        .requestMatchers(HttpMethod.POST, "/auth/generate-token",
+                        .requestMatchers(HttpMethod.POST,
+                                "/auth/generate-token",
                                 "/customers/").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/customers/",
-                                "/products/{id}").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.GET,
+                                "/customers/",
+                                "/products/{id}",
+                                "/products/").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.POST, "/products/").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/test/user").hasRole("USER")
                         .requestMatchers(HttpMethod.GET, "/test/admin").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/products/").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())

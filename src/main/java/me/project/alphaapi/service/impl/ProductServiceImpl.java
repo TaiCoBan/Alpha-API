@@ -11,11 +11,12 @@ import org.aspectj.weaver.ast.Not;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -42,10 +43,15 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> findAll() {
-        return List.of();
+    @Cacheable(value = "ProductDTO")
+    public List<ProductDTO> findAll() {
+        return productRepo.findAll().stream()
+                .map(p -> productMapper.toDTO(p))
+                .collect(Collectors.toList());
     }
 
+
+    @Cacheable(value = "ProductDTO", key = "#productId")
     @Override
     public ProductDTO findById(Long productId) {
         Optional<Product> product = productRepo.findById(productId);
