@@ -26,4 +26,8 @@ public class ProductDTO implements Serializable {
     private int stock;
 
     private String categoryName;
+
+    public ProductDTO(String name) {
+        this.name = name;
+    }
 }
