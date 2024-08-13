@@ -18,6 +18,9 @@ public class Address {
     @Column(name = "address_id")
     private Long addressId;
 
+    @Column(name = "city")
+    private String city;
+
     @OneToMany(mappedBy = "address")
     private List<Customer> customers;
 

@@ -11,11 +11,12 @@ import org.aspectj.weaver.ast.Not;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,24 +55,31 @@ public class ProductServiceImpl implements ProductService {
     @Cacheable(value = "ProductDTO", key = "#productId")
     @Override
     public ProductDTO findById(Long productId) {
-        Optional<Product> product = productRepo.findById(productId);
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new NotFoundException("Product not found ID = " + productId));
 
-        if (product.isEmpty()) {
-            throw new NotFoundException("Product not found ID = " + productId);
-        }
-
-        LOGGER.info("Find product by id: {}", product.get());
-
-        return productMapper.toDTO(product.get());
+        return productMapper.toDTO(product);
     }
 
     @Override
-    public Product update(Product newProduct) {
-        return null;
+    @CachePut(value = "ProductDTO", key = "#newProduct.productId")
+    public ProductDTO update(Product newProduct) {
+        Product current = productRepo.findById(newProduct.getProductId())
+                .orElseThrow(() -> new NotFoundException("Product not found ID = " + newProduct.getProductId()));
+
+        current.setName(newProduct.getName());
+        current.setDescription(newProduct.getDescription());
+        current.setCategory(newProduct.getCategory());
+        current.setPrice(newProduct.getPrice());
+        current.setSKU(newProduct.getSKU());
+        current.setStock(newProduct.getStock());
+
+        return productMapper.toDTO(productRepo.save(current));
     }
 
     @Override
+    @CacheEvict(value = "ProductDTO", key = "#productId")
     public void deleteById(Long productId) {
-
+        productRepo.deleteById(productId);
     }
 }

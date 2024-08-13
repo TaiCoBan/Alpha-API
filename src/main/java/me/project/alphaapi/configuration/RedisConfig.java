@@ -7,7 +7,6 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisKeyValueAdapter;
@@ -26,17 +25,15 @@ import java.util.Collections;
 public class RedisConfig {
 
     @Bean
-    public JedisConnectionFactory redisConnectionFactory() {
-//        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-//                .useSsl().and()
-//                .commandTimeout(Duration.ofSeconds(10))
-//                .shutdownTimeout(Duration.ZERO)
-//                .build();
-//        RedisStandaloneConfiguration serverConfig = new RedisStandaloneConfiguration("localhost", 6379);
-//
-//        return new LettuceConnectionFactory(serverConfig, clientConfig);
-        return new JedisConnectionFactory(new RedisStandaloneConfiguration("localhost", 6379));
+    public LettuceConnectionFactory lettuceConnectionFactory() {
 
+        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+//                .useSsl().and()
+                .commandTimeout(Duration.ofSeconds(2))
+                .shutdownTimeout(Duration.ZERO)
+                .build();
+
+        return new LettuceConnectionFactory(new RedisStandaloneConfiguration("localhost", 6379), clientConfig);
     }
 
     @Bean
@@ -58,9 +55,9 @@ public class RedisConfig {
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
 
-        RedisCacheConfiguration defaults = RedisCacheConfiguration.defaultCacheConfig();
-//                .entryTtl(Duration.ofSeconds(30));
-//                .enableTimeToIdle();
+        RedisCacheConfiguration defaults = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofSeconds(20))
+                .enableTimeToIdle();
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(defaults)
