@@ -17,7 +17,7 @@ public class ProductMapper {
                 product.getDescription(),
                 product.getPrice(),
                 product.getStock(),
-                product.getCategory().getName()
+                "testt"
         );
     }
 }

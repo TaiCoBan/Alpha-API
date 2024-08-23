@@ -1,5 +1,6 @@
 package me.project.alphaapi.service.impl;
 
+import me.project.alphaapi.configuration.kafka.KafkaProducer;
 import me.project.alphaapi.dto.ProductDTO;
 import me.project.alphaapi.entity.Product;
 import me.project.alphaapi.exception.NotFoundException;
@@ -33,14 +34,16 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private ProductMapper productMapper;
 
+    @Autowired
+    private KafkaProducer kafkaProducer;
+
     @Override
     public ProductDTO save(Product product) {
         LOGGER.info("New product: {}", product);
 
-        product.setCategory(categoryRepo.findByCategoryId(1L));
+        kafkaProducer.sendSaveMessage(product);
 
-        LOGGER.info("Save product: {}", product);
-        return productMapper.toDTO(productRepo.save(product));
+        return productMapper.toDTO(product);
     }
 
     @Override
@@ -64,22 +67,18 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @CachePut(value = "ProductDTO", key = "#newProduct.productId")
     public ProductDTO update(Product newProduct) {
-        Product current = productRepo.findById(newProduct.getProductId())
-                .orElseThrow(() -> new NotFoundException("Product not found ID = " + newProduct.getProductId()));
+        LOGGER.info("New product: {}", newProduct);
 
-        current.setName(newProduct.getName());
-        current.setDescription(newProduct.getDescription());
-        current.setCategory(newProduct.getCategory());
-        current.setPrice(newProduct.getPrice());
-        current.setSKU(newProduct.getSKU());
-        current.setStock(newProduct.getStock());
+        kafkaProducer.sendUpdateMessage(newProduct);
 
-        return productMapper.toDTO(productRepo.save(current));
+        return productMapper.toDTO(newProduct);
     }
 
     @Override
     @CacheEvict(value = "ProductDTO", key = "#productId")
     public void deleteById(Long productId) {
-        productRepo.deleteById(productId);
+        LOGGER.info("Delete product: {}", productId);
+
+        kafkaProducer.sendDeleteMessage(productRepo.findById(productId).orElseThrow(() -> new NotFoundException("Product not found ID = " + productId)));
     }
 }
